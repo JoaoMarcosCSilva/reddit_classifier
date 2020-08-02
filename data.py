@@ -27,8 +27,15 @@ class DataGenerator(tf.keras.utils.Sequence):
   def __data_generation(self, mask):
     x = self.tokenizer(self.x_df[mask].values.tolist(), padding = True, return_tensors = 'tf', truncation = True)
     y = tf.convert_to_tensor(self.y_df[mask].values, dtype = np.float32)
+
     if self.embedding_type == 'cls':
         x = self.bert(x)[0][:,0]
+    elif self.embedding_type == 'both':
+        outputs = self.bert(x)[0]
+        x1 = outputs[:, 0]
+        x2 = tf.reduce_mean(outputs, axis = 1)
+        x = tf.concat([x1, x2], axis = 1)
+        return x
     else:
         x = tf.reduce_mean(self.bert(x)[0], axis = 1)
     return x, y
