@@ -35,7 +35,6 @@ class DataGenerator(tf.keras.utils.Sequence):
         x1 = outputs[:, 0]
         x2 = tf.reduce_mean(outputs, axis = 1)
         x = tf.concat([x1, x2], axis = 1)
-        return x
     else:
         x = tf.reduce_mean(self.bert(x)[0], axis = 1)
     return x, y
