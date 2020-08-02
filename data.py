@@ -36,7 +36,7 @@ class DataGenerator(tf.keras.utils.Sequence):
         x2 = tf.reduce_mean(outputs, axis = 1)
         x = tf.concat([x1, x2], axis = 1)
     elif self.embedding_type == 'full':
-        x = outputs
+        x = self.bert(x)[0]
     else:
         x = tf.reduce_mean(self.bert(x)[0], axis = 1)
     return x, y
