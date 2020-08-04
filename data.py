@@ -21,9 +21,9 @@ class DataGenerator(tf.keras.utils.Sequence):
     self.steps = steps
     self.length = len(self.x_df)
 
-    if transformation is str:
+    if type(transformation) == str:
         if transformation in transformations.str_to_func:
-            self.transformation = str_to_func[transformation]
+            self.transformation = transformations.str_to_func[transformation]
         else:
             print("Please pass a valid transformation")
     else:
@@ -33,9 +33,10 @@ class DataGenerator(tf.keras.utils.Sequence):
     return self.steps
 
   def __data_generation(self, mask):
-    x = self.tokenizer(self.x_df[mask].values.tolist(), padding = True, return_tensors = 'tf', truncation = True)
+    inputs = self.tokenizer(self.x_df[mask].values.tolist(), padding = True, return_tensors = 'tf', truncation = True)
     y = tf.convert_to_tensor(self.y_df[mask].values, dtype = np.float32)
-    
+
+    x = self.bert(inputs)[0]    
     if self.transformation is not None:
         x = self.transformation(x)
 
