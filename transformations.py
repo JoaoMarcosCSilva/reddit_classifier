@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 def classifier_token(bert_output):
-    return bert_output[0][:, 0]
+    return bert_output[:, 0]
 
 def average_tokens(bert_output):
     return tf.reduce_mean(bert_output, axis = 1)
