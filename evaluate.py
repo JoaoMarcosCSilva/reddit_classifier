@@ -1,4 +1,5 @@
 from sklearn import metrics
+import matplotlib.pyplot as plt
 import seaborn as sn
 import pandas as pd
 import tensorflow as tf
@@ -18,3 +19,15 @@ def plot_confusion_matrix(model, datagen, repeat, columns):
    
     df_matrix = pd.DataFrame((matrix) / (1e-6 + np.sum(matrix, axis = 0)), index = columns, columns = columns)
     sn.heatmap(df_matrix)
+
+def plot_predictions(classifier, text, train_gen):
+    if type(text) == str:
+        text = [text]
+
+    inputs = train_gen.tokenizer(text, padding = True, return_tensors = 'tf', truncation = True)
+    x = train_gen.transformation(train_gen.bert(inputs)[0])
+    y = tf.nn.softmax(classifier(x)).numpy()
+
+    df = pd.DataFrame(y, columns = labels)
+    plt.title(text)
+    sn.heatmap(df)        
