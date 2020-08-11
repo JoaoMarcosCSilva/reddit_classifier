@@ -21,10 +21,8 @@ def plot_confusion_matrix(model, datagen, repeat, columns):
     sn.heatmap(df_matrix)
 
 def plot_predictions(model, text, datagen, columns):
-    if type(text) == str:
-        text = [text]
 
-    inputs = datagen.tokenizer(text, padding = True, return_tensors = 'tf', truncation = True)
+    inputs = datagen.tokenizer([text], padding = True, return_tensors = 'tf', truncation = True)
     x = datagen.transformation(datagen.bert(inputs)[0])
     y = tf.nn.softmax(model(x)).numpy()
 

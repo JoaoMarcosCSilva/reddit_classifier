@@ -56,7 +56,9 @@ def load_data(filepath):
 
     df = df[df['Text'].apply(lambda x: isinstance(x, str))]
     df = df.drop_duplicates()
+    return df
 
+def split_data(df):
     labels = pd.get_dummies(df.Label)
 
     msk = np.random.rand(len(df)) < 0.6
