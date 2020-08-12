@@ -12,8 +12,7 @@ def download_from_kaggle(kaggle_json_filepath):
     os.system('unzip reddit-dataset.zip')
 
 class DataGenerator(tf.keras.utils.Sequence):
-  def __init__(self, x_df, y_df, tokenizer, bert, transformation = 'cls', batch_size = 32, steps = 300):
-    self.bert = bert 
+  def __init__(self, x_df, y_df, tokenizer, batch_size = 32, steps = 300):
     self.tokenizer = tokenizer 
     self.x_df = x_df
     self.y_df = y_df
@@ -21,25 +20,12 @@ class DataGenerator(tf.keras.utils.Sequence):
     self.steps = steps
     self.length = len(self.x_df)
 
-    if type(transformation) == str:
-        if transformation in transformations.str_to_func:
-            self.transformation = transformations.str_to_func[transformation]
-        else:
-            print("Please pass a valid transformation")
-    else:
-        self.transformation = transformation
-
   def __len__(self):
     return self.steps
 
   def __data_generation(self, mask):
-    inputs = self.tokenizer(self.x_df[mask].values.tolist(), padding = True, return_tensors = 'tf', truncation = True)
+    x = self.tokenizer(self.x_df[mask].values.tolist(), padding = True, return_tensors = 'tf', truncation = True)
     y = tf.convert_to_tensor(self.y_df[mask].values, dtype = np.float32)
-
-    x = self.bert(inputs)[0]    
-    if self.transformation is not None:
-        x = self.transformation(x)
-
     return x, y
 
   def __getitem__(self, index):
