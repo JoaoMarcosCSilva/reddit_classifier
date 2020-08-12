@@ -26,6 +26,7 @@ class DataGenerator(tf.keras.utils.Sequence):
   def __data_generation(self, mask):
     x = self.tokenizer(self.x_df[mask].values.tolist(), padding = True, return_tensors = 'tf', truncation = True)
     y = tf.convert_to_tensor(self.y_df[mask].values, dtype = np.float32)
+    x = list(x.values())
     return x, y
 
   def __getitem__(self, index):
