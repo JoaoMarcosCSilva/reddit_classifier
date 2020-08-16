@@ -18,7 +18,7 @@ def plot_confusion_matrix(model, datagen, repeat, columns):
               matrix = metrics.confusion_matrix(tf.argmax(y, axis = 1), tf.argmax(pred, axis = 1), list(range(19)))
    
     df_matrix = pd.DataFrame((matrix) / (1e-6 + np.sum(matrix, axis = 0)), index = columns, columns = columns)
-    sn.heatmap(df_matrix)
+    sn.heatmap(df_matrix, vmin = 0, vmax = 1, annot = True)
 
 def plot_predictions(model, text, datagen, columns):
 
