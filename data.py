@@ -20,6 +20,7 @@ class DataGenerator(tf.keras.utils.Sequence):
     self.batch_size = batch_size
     self.steps = steps
     self.length = len(self.x_df)
+    self.baked = False
 
     if type(transformation) == str:
         if transformation in transformations.str_to_func:
@@ -30,6 +31,8 @@ class DataGenerator(tf.keras.utils.Sequence):
         self.transformation = transformation
 
   def __len__(self):
+    if self.baked:
+        return len(self.baked_tensors)
     return self.steps
 
   def __data_generation(self, mask):
@@ -40,12 +43,20 @@ class DataGenerator(tf.keras.utils.Sequence):
     if self.transformation is not None:
         x = self.transformation(x)
 
-    return x, y
+    return (x, inputs['attention_mask']), y
 
   def __getitem__(self, index):
+    if self.baked:
+        return self.baked_tensors[index]
     mask = np.concatenate([np.zeros(self.length - self.batch_size), np.ones(self.batch_size)]) == 1
     np.random.shuffle(mask)
     return self.__data_generation(mask)
+
+  def bake(self):
+    self.baked_tensors = []
+    for i in self:
+        self.baked_tensors.append(i)
+    self.baked = True
 
 def load_data(filepath):
     print('Reading csv file...')
