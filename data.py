@@ -12,7 +12,7 @@ def download_from_kaggle(kaggle_json_filepath):
     os.system('unzip reddit-dataset.zip')
 
 class DataGenerator(tf.keras.utils.Sequence):
-  def __init__(self, x_df, y_df, tokenizer, bert, transformation = 'cls', batch_size = 32, steps = 300):
+  def __init__(self, x_df, y_df, tokenizer, bert, transformation = 'cls', batch_size = 32, steps = 300, return_mask = True):
     self.bert = bert 
     self.tokenizer = tokenizer 
     self.x_df = x_df
@@ -21,6 +21,10 @@ class DataGenerator(tf.keras.utils.Sequence):
     self.steps = steps
     self.length = len(self.x_df)
     self.baked = False
+    self.return_mask = return_mask
+
+    self.position = 0
+    self.total_batches = self.length // self.batch_size
 
     if type(transformation) == str:
         if transformation in transformations.str_to_func:
@@ -43,19 +47,27 @@ class DataGenerator(tf.keras.utils.Sequence):
     if self.transformation is not None:
         x = self.transformation(x)
 
-    return (x, inputs['attention_mask']), y
+    return ((x, inputs['attention_mask']), y) if self.return_mask else (x, y)
 
   def __getitem__(self, index):
     if self.baked:
         return self.baked_tensors[index]
-    mask = np.concatenate([np.zeros(self.length - self.batch_size), np.ones(self.batch_size)]) == 1
-    np.random.shuffle(mask)
+
+    self.position = self.position % self.total_batches
+
+    mask = np.concatenate([
+            np.zeros(self.position * self.batch_size),
+            np.ones(self.batch_size),
+            np.zeros(self.length - (1 + self.position)*self.batch_size)]) == 1
+    
+    self.position += 1
     return self.__data_generation(mask)
 
   def bake(self):
     self.baked_tensors = []
     for i in self:
         self.baked_tensors.append(i)
+
     self.baked = True
 
 def load_data(filepath):
